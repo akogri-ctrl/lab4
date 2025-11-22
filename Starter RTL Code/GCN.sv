@@ -116,18 +116,18 @@ module GCN
   // Purpose: Register all outputs to avoid combinational paths at module boundary
   // ============================================================================
 
+  // Control signals are combinational for proper timing
+  assign read_address = read_address_reg;
+  assign enable_read = enable_read_reg;
+  assign coo_address = coo_address_reg;
+
+  // Data outputs are registered
   always_ff @(posedge clk or posedge reset)
     if (reset) begin
-      coo_address <= 3'b000;
-      read_address <= 13'b0;
-      enable_read <= 1'b0;
       done <= 1'b0;
       for (int i = 0; i < FEATURE_ROWS; i++)
         max_addi_answer[i] <= 2'b00;
     end else begin
-      coo_address <= coo_address_reg;
-      read_address <= read_address_reg;
-      enable_read <= enable_read_reg;
       done <= done_reg;
       max_addi_answer <= max_addi_answer_reg;
     end
@@ -178,11 +178,9 @@ module GCN
     end
   end
 
-  // Register the read address and enable for output
+  // Control signals go directly to output (no extra registration for timing)
   assign read_address_reg = read_address_internal;
   assign enable_read_reg = enable_read_internal;
-
-  // COO address output
   assign coo_address_reg = coo_count;
 
 
