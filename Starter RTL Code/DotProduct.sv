@@ -1,3 +1,5 @@
+`timescale 1ps/100fs
+
 // Dot Product Module
 // Computes the dot product of two 96-element vectors
 // Each element is 5 bits, output is 16 bits

@@ -1,3 +1,5 @@
+`timescale 1ps/100fs
+
 // Parameterized D Flip-Flop Module
 // Used for I/O boundary registers to ensure no combinational paths
 // Author: Lab4 Implementation

@@ -1,3 +1,5 @@
+`timescale 1ps/100fs
+
 // Argmax Module
 // Finds the index of the maximum value among 3 inputs
 // Used for classification: outputs genre index (0=Action, 1=Humor, 2=Family)

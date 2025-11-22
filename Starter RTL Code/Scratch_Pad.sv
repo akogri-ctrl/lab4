@@ -1,3 +1,4 @@
+`timescale 1ps/100fs
 
 module Scratch_Pad 
   #(parameter WEIGHT_ROWS = 96,

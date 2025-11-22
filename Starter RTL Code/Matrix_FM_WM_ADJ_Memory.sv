@@ -1,3 +1,5 @@
+`timescale 1ps/100fs
+
 module Matrix_FM_WM_ADJ_Memory 
   #(parameter FEATURE_ROWS = 6,
     parameter WEIGHT_COLS = 3,

@@ -1,3 +1,4 @@
+`timescale 1ps/100fs
 
 module Transformation_FSM 
   #(parameter FEATURE_ROWS = 6,

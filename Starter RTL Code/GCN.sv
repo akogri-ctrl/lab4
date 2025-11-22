@@ -1,3 +1,5 @@
+`timescale 1ps/100fs
+
 module GCN
   #(parameter FEATURE_COLS = 96,
     parameter WEIGHT_ROWS = 96,

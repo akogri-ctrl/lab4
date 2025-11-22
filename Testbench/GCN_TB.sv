@@ -83,6 +83,20 @@ end
 		$finish;
 	end 
 
+	// Debug monitor
+	initial begin
+		forever begin
+			#1000;  // Print every 1000 time units
+			$display("Time=%0t: FSM_state=%0d, agg_state=%0d, class_state=%0d, done=%b, done_internal=%b",
+				$time,
+				GCN_DUT.fsm_inst.current_state,
+				GCN_DUT.agg_state,
+				GCN_DUT.class_state,
+				done,
+				GCN_DUT.done_internal);
+		end
+	end
+
 	initial begin
 		start = 1'b0;
 		rst = 1'b1;
@@ -92,10 +106,12 @@ end
 			rst = ~rst;
 		end
                 start = 1'b1;
+		$display("Start signal asserted at time %0t", $time);
 
 		wait (done === 1'b1);
+		$display("Done signal detected at time %0t", $time);
 		#21
-		
+
 		check_for_correct_address(max_addi_answer_final, gold_output_addr);
 		$finish;
  	end
