@@ -85,15 +85,19 @@ end
 
 	// Debug monitor
 	initial begin
-		forever begin
+		#100;  // Wait for reset to complete
+		repeat(50) begin  // Only print first 50 times
 			#1000;  // Print every 1000 time units
-			$display("Time=%0t: FSM_state=%0d, agg_state=%0d, class_state=%0d, done=%b, done_internal=%b",
+			$display("Time=%0t: FSM=%s, weight_cnt=%0d, feat_cnt=%0d, agg_st=%0d, class_st=%0d, done=%b, done_int=%b, coo_cnt=%0d",
 				$time,
-				GCN_DUT.fsm_inst.current_state,
+				GCN_DUT.fsm_inst.current_state.name(),
+				GCN_DUT.weight_count,
+				GCN_DUT.feature_count,
 				GCN_DUT.agg_state,
 				GCN_DUT.class_state,
 				done,
-				GCN_DUT.done_internal);
+				GCN_DUT.done_internal,
+				GCN_DUT.coo_count);
 		end
 	end
 
