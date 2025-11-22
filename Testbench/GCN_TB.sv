@@ -83,16 +83,28 @@ end
 		$finish;
 	end 
 
+	// Debug monitor - track memory reads
+	always @(posedge read_enable or read_addres_mem) begin
+		if (read_enable) begin
+			$display("Time=%0t: TESTBENCH READ addr=%0d, data[0]=%0d",
+				$time, read_addres_mem, input_data[0]);
+		end
+	end
+
 	// Debug monitor - track writes
 	int write_count = 0;
 	always @(posedge clk) begin
 		if (GCN_DUT.enable_write_fm_wm_prod) begin
 			write_count++;
-			$display("Time=%0t: WRITE to FM_WM[%0d][%0d] = %0d",
-				$time,
-				GCN_DUT.feature_count,
-				GCN_DUT.weight_count,
-				GCN_DUT.dot_product_result);
+			if (write_count <= 3) begin  // Only print first few
+				$display("Time=%0t: WRITE FM_WM[%0d][%0d]=%0d, data_in_reg[0]=%0d, wt_stored[0]=%0d",
+					$time,
+					GCN_DUT.feature_count,
+					GCN_DUT.weight_count,
+					GCN_DUT.dot_product_result,
+					GCN_DUT.data_in_reg[0],
+					GCN_DUT.weight_col_stored[0]);
+			end
 		end
 	end
 

@@ -146,8 +146,11 @@ module GCN
       weight_count <= weight_count + 1;
 
   // Feature counter: 0 to 5 (6 feature rows)
+  // Reset to 0 when moving to next weight column
   always_ff @(posedge clk or posedge reset)
     if (reset)
+      feature_count <= {COUNTER_FEATURE_WIDTH{1'b0}};
+    else if (enable_weight_counter)
       feature_count <= {COUNTER_FEATURE_WIDTH{1'b0}};
     else if (enable_feature_counter)
       feature_count <= feature_count + 1;
