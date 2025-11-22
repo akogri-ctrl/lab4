@@ -75,8 +75,23 @@ module GCN
   logic [COO_BW-1:0] src_node, dst_node;
   logic enable_aggregation;
 
+  // Aggregation state machine types and signals
+  typedef enum logic [1:0] {
+    AGG_IDLE,
+    AGG_ACTIVE,
+    AGG_DONE
+  } agg_state_t;
+  agg_state_t agg_state, agg_next_state;
+
   // --- Signals for argmax (classification) ---
-  // Removed: using single argmax_result instead
+  // Classification state machine types and signals
+  typedef enum logic [1:0] {
+    CLASS_IDLE,
+    CLASS_ACTIVE,
+    CLASS_DONE
+  } class_state_t;
+  class_state_t class_state, class_next_state;
+  logic [COO_BW-1:0] class_count;
 
   // --- Address generation ---
   logic [ADDRESS_WIDTH-1:0] read_address_internal;
@@ -289,13 +304,7 @@ module GCN
 
   // Enable aggregation after transformation is done
   // Simple state machine: start aggregation when FSM done, aggregate 6 edges
-  typedef enum logic [1:0] {
-    AGG_IDLE,
-    AGG_ACTIVE,
-    AGG_DONE
-  } agg_state_t;
-
-  agg_state_t agg_state, agg_next_state;
+  // (State machine types declared in internal signals section above)
 
   always_ff @(posedge clk) begin
     if (reset_reg) begin
@@ -344,14 +353,7 @@ module GCN
 
   // Read each row of FM_WM_ADJ and compute argmax
   // We need to sequence through all 6 nodes to compute argmax for each
-  typedef enum logic [1:0] {
-    CLASS_IDLE,
-    CLASS_ACTIVE,
-    CLASS_DONE
-  } class_state_t;
-
-  class_state_t class_state, class_next_state;
-  logic [COO_BW-1:0] class_count;
+  // (State machine types and signals declared in internal signals section above)
 
   always_ff @(posedge clk) begin
     if (reset_reg) begin
