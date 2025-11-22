@@ -83,22 +83,20 @@ end
 		$finish;
 	end 
 
-	// Debug monitor
+	// Debug monitor - final values
 	initial begin
-		#100;  // Wait for reset to complete
-		repeat(50) begin  // Only print first 50 times
-			#1000;  // Print every 1000 time units
-			$display("Time=%0t: FSM=%s, weight_cnt=%0d, feat_cnt=%0d, agg_st=%0d, class_st=%0d, done=%b, done_int=%b, coo_cnt=%0d",
-				$time,
-				GCN_DUT.fsm_inst.current_state.name(),
-				GCN_DUT.weight_count,
-				GCN_DUT.feature_count,
-				GCN_DUT.agg_state,
-				GCN_DUT.class_state,
-				done,
-				GCN_DUT.done_internal,
-				GCN_DUT.coo_count);
+		wait (done === 1'b1);
+		#10;
+		$display("\n=== Final FM_WM_ADJ Memory Contents ===");
+		for (int row = 0; row < 6; row++) begin
+			$display("Node %0d: [%0d, %0d, %0d] -> argmax=%0d",
+				row,
+				GCN_DUT.fm_wm_adj_memory_inst.mem[row][0],
+				GCN_DUT.fm_wm_adj_memory_inst.mem[row][1],
+				GCN_DUT.fm_wm_adj_memory_inst.mem[row][2],
+				max_addi_answer_final[row]);
 		end
+		$display("=====================================\n");
 	end
 
 	initial begin
