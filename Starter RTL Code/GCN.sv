@@ -36,7 +36,7 @@ module GCN
   // ============================================================================
 
   // --- Registered inputs (boundary flip-flops) ---
-  logic reset_reg, start_reg;
+  logic start_reg;
   logic [WEIGHT_WIDTH-1:0] data_in_reg [0:WEIGHT_ROWS-1];
   logic [COO_BW-1:0] coo_in_reg [0:1];
 
@@ -105,7 +105,6 @@ module GCN
   // ============================================================================
 
   always_ff @(posedge clk) begin
-    reset_reg <= reset;
     start_reg <= start;
     data_in_reg <= data_in;
     coo_in_reg <= coo_in;
@@ -118,7 +117,7 @@ module GCN
   // ============================================================================
 
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       coo_address <= '0;
       read_address <= '0;
       enable_read <= '0;
@@ -143,7 +142,7 @@ module GCN
 
   // Weight counter: 0 to 2 (3 weight columns)
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       weight_count <= '0;
     end else if (enable_weight_counter) begin
       weight_count <= weight_count + 1;
@@ -152,7 +151,7 @@ module GCN
 
   // Feature counter: 0 to 5 (6 feature rows)
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       feature_count <= '0;
     end else if (enable_feature_counter) begin
       feature_count <= feature_count + 1;
@@ -162,7 +161,7 @@ module GCN
   // COO counter: 0 to 5 (6 edges in adjacency matrix)
   // This counter is used during aggregation phase (after transformation)
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       coo_count <= '0;
     end else if (enable_aggregation && coo_count < COO_NUM_OF_COLS - 1) begin
       coo_count <= coo_count + 1;
@@ -207,7 +206,7 @@ module GCN
     .COUNTER_FEATURE_WIDTH(COUNTER_FEATURE_WIDTH)
   ) fsm_inst (
     .clk(clk),
-    .reset(reset_reg),
+    .reset(reset),
     .start(start_reg),
     .weight_count(weight_count),
     .feature_count(feature_count),
@@ -227,7 +226,7 @@ module GCN
     .WEIGHT_WIDTH(WEIGHT_WIDTH)
   ) scratch_pad_inst (
     .clk(clk),
-    .reset(reset_reg),
+    .reset(reset),
     .write_enable(enable_scratch_pad),
     .weight_col_in(data_in_reg),
     .weight_col_out(weight_col_stored)
@@ -251,7 +250,7 @@ module GCN
     .DOT_PROD_WIDTH(DOT_PROD_WIDTH)
   ) fm_wm_memory_inst (
     .clk(clk),
-    .rst(reset_reg),
+    .rst(reset),
     .write_row(feature_count),
     .write_col(weight_count),
     .read_row(src_node),  // Will be used during aggregation
@@ -271,7 +270,7 @@ module GCN
     .DOT_PROD_WIDTH(DOT_PROD_WIDTH)
   ) fm_wm_adj_memory_inst (
     .clk(clk),
-    .rst(reset_reg),
+    .rst(reset),
     .write_row(dst_node),
     .read_row(fm_wm_adj_read_addr),  // Read different rows during classification
     .wr_en(enable_aggregation),
@@ -309,7 +308,7 @@ module GCN
   // (State machine types declared in internal signals section above)
 
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       agg_state <= AGG_IDLE;
     end else begin
       agg_state <= agg_next_state;
@@ -358,7 +357,7 @@ module GCN
   // (State machine types and signals declared in internal signals section above)
 
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       class_state <= CLASS_IDLE;
       class_count <= '0;
     end else begin
@@ -393,7 +392,7 @@ module GCN
 
   // Capture argmax results for each node
   always_ff @(posedge clk) begin
-    if (reset_reg) begin
+    if (reset) begin
       for (int i = 0; i < FEATURE_ROWS; i++) begin
         max_addi_answer_reg[i] <= '0;
       end
