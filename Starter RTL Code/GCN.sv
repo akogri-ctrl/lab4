@@ -174,7 +174,8 @@ module GCN
   always_comb begin
     if (read_feature_or_weight) begin
       // Reading feature matrix: address = 512 + feature_count
-      read_address_internal = {3'b100, {(ADDRESS_WIDTH-3-COUNTER_FEATURE_WIDTH){1'b0}}, feature_count};
+      // 512 = 2^9, so set bit 9 and add feature_count
+      read_address_internal = 13'd512 + {{(ADDRESS_WIDTH-COUNTER_FEATURE_WIDTH){1'b0}}, feature_count};
     end else begin
       // Reading weight matrix: address = weight_count
       read_address_internal = {{(ADDRESS_WIDTH-COUNTER_WEIGHT_WIDTH){1'b0}}, weight_count};
