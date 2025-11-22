@@ -87,15 +87,25 @@ end
 	initial begin
 		wait (done === 1'b1);
 		#10;
-		$display("\n=== Final FM_WM_ADJ Memory Contents ===");
+		$display("\n=== FM_WM Memory (Transformation Results) ===");
 		for (int row = 0; row < 6; row++) begin
-			$display("Node %0d: [%0d, %0d, %0d] -> argmax=%0d",
+			$display("Row %0d: [%0d, %0d, %0d]",
+				row,
+				GCN_DUT.fm_wm_memory_inst.mem[row][0],
+				GCN_DUT.fm_wm_memory_inst.mem[row][1],
+				GCN_DUT.fm_wm_memory_inst.mem[row][2]);
+		end
+		$display("\n=== FM_WM_ADJ Memory (Aggregation Results) ===");
+		for (int row = 0; row < 6; row++) begin
+			$display("Node %0d: [%0d, %0d, %0d] -> argmax=%0d (expected=%0d)",
 				row,
 				GCN_DUT.fm_wm_adj_memory_inst.mem[row][0],
 				GCN_DUT.fm_wm_adj_memory_inst.mem[row][1],
 				GCN_DUT.fm_wm_adj_memory_inst.mem[row][2],
-				max_addi_answer_final[row]);
+				max_addi_answer_final[row],
+				gold_output_addr[row]);
 		end
+		$display("\nAgg state: %0d, Class state: %0d", GCN_DUT.agg_state, GCN_DUT.class_state);
 		$display("=====================================\n");
 	end
 
