@@ -143,7 +143,7 @@ module GCN
   // Weight counter: 0 to 2 (3 weight columns)
   always_ff @(posedge clk) begin
     if (reset) begin
-      weight_count <= '0;
+      weight_count <= {COUNTER_WEIGHT_WIDTH{1'b0}};
     end else if (enable_weight_counter) begin
       weight_count <= weight_count + 1;
     end
@@ -152,7 +152,7 @@ module GCN
   // Feature counter: 0 to 5 (6 feature rows)
   always_ff @(posedge clk) begin
     if (reset) begin
-      feature_count <= '0;
+      feature_count <= {COUNTER_FEATURE_WIDTH{1'b0}};
     end else if (enable_feature_counter) begin
       feature_count <= feature_count + 1;
     end
@@ -162,7 +162,7 @@ module GCN
   // This counter is used during aggregation phase (after transformation)
   always_ff @(posedge clk) begin
     if (reset) begin
-      coo_count <= '0;
+      coo_count <= {COO_BW{1'b0}};
     end else if (enable_aggregation && coo_count < COO_NUM_OF_COLS - 1) begin
       coo_count <= coo_count + 1;
     end
@@ -359,7 +359,7 @@ module GCN
   always_ff @(posedge clk) begin
     if (reset) begin
       class_state <= CLASS_IDLE;
-      class_count <= '0;
+      class_count <= {COO_BW{1'b0}};
     end else begin
       class_state <= class_next_state;
       if (class_state == CLASS_ACTIVE) begin
