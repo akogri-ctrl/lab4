@@ -116,15 +116,14 @@ module GCN
   // Purpose: Register all outputs to avoid combinational paths at module boundary
   // ============================================================================
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk or posedge reset)
     if (reset) begin
-      coo_address <= '0;
-      read_address <= '0;
-      enable_read <= '0;
-      done <= '0;
-      for (int i = 0; i < FEATURE_ROWS; i++) begin
-        max_addi_answer[i] <= '0;
-      end
+      coo_address <= 3'b000;
+      read_address <= 13'b0;
+      enable_read <= 1'b0;
+      done <= 1'b0;
+      for (int i = 0; i < FEATURE_ROWS; i++)
+        max_addi_answer[i] <= 2'b00;
     end else begin
       coo_address <= coo_address_reg;
       read_address <= read_address_reg;
@@ -132,7 +131,6 @@ module GCN
       done <= done_reg;
       max_addi_answer <= max_addi_answer_reg;
     end
-  end
 
 
   // ============================================================================
@@ -141,32 +139,26 @@ module GCN
   // ============================================================================
 
   // Weight counter: 0 to 2 (3 weight columns)
-  always_ff @(posedge clk) begin
-    if (reset) begin
+  always_ff @(posedge clk or posedge reset)
+    if (reset)
       weight_count <= {COUNTER_WEIGHT_WIDTH{1'b0}};
-    end else if (enable_weight_counter) begin
+    else if (enable_weight_counter)
       weight_count <= weight_count + 1;
-    end
-  end
 
   // Feature counter: 0 to 5 (6 feature rows)
-  always_ff @(posedge clk) begin
-    if (reset) begin
+  always_ff @(posedge clk or posedge reset)
+    if (reset)
       feature_count <= {COUNTER_FEATURE_WIDTH{1'b0}};
-    end else if (enable_feature_counter) begin
+    else if (enable_feature_counter)
       feature_count <= feature_count + 1;
-    end
-  end
 
   // COO counter: 0 to 5 (6 edges in adjacency matrix)
   // This counter is used during aggregation phase (after transformation)
-  always_ff @(posedge clk) begin
-    if (reset) begin
+  always_ff @(posedge clk or posedge reset)
+    if (reset)
       coo_count <= {COO_BW{1'b0}};
-    end else if (enable_aggregation && coo_count < COO_NUM_OF_COLS - 1) begin
+    else if (enable_aggregation && coo_count < COO_NUM_OF_COLS - 1)
       coo_count <= coo_count + 1;
-    end
-  end
 
 
   // ============================================================================
@@ -307,13 +299,11 @@ module GCN
   // Simple state machine: start aggregation when FSM done, aggregate 6 edges
   // (State machine types declared in internal signals section above)
 
-  always_ff @(posedge clk) begin
-    if (reset) begin
+  always_ff @(posedge clk or posedge reset)
+    if (reset)
       agg_state <= AGG_IDLE;
-    end else begin
+    else
       agg_state <= agg_next_state;
-    end
-  end
 
   always_comb begin
     agg_next_state = agg_state;
@@ -356,17 +346,15 @@ module GCN
   // We need to sequence through all 6 nodes to compute argmax for each
   // (State machine types and signals declared in internal signals section above)
 
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk or posedge reset)
     if (reset) begin
       class_state <= CLASS_IDLE;
       class_count <= {COO_BW{1'b0}};
     end else begin
       class_state <= class_next_state;
-      if (class_state == CLASS_ACTIVE) begin
+      if (class_state == CLASS_ACTIVE)
         class_count <= class_count + 1;
-      end
     end
-  end
 
   always_comb begin
     class_next_state = class_state;
@@ -391,15 +379,12 @@ module GCN
   end
 
   // Capture argmax results for each node
-  always_ff @(posedge clk) begin
+  always_ff @(posedge clk or posedge reset)
     if (reset) begin
-      for (int i = 0; i < FEATURE_ROWS; i++) begin
-        max_addi_answer_reg[i] <= '0;
-      end
-    end else if (class_state == CLASS_ACTIVE) begin
+      for (int i = 0; i < FEATURE_ROWS; i++)
+        max_addi_answer_reg[i] <= 2'b00;
+    end else if (class_state == CLASS_ACTIVE)
       max_addi_answer_reg[class_count] <= argmax_result;
-    end
-  end
 
   // Final done signal
   assign done_reg = (class_state == CLASS_DONE);
