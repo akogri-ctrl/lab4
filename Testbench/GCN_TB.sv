@@ -70,9 +70,13 @@ end
             forever #(HALF_CLOCK_CYCLE) clk <= ~clk;
         end
 
+	// VCD dump for waveform viewing
+	initial begin
+		$dumpfile("current_output.vcd");
+		$dumpvars(0, GCN_TB);
+	end
 
-
-	initial begin 
+	initial begin
 		#100000;
 		$display("Simulation Time Expired");
 
