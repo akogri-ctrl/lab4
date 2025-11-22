@@ -83,10 +83,24 @@ end
 		$finish;
 	end 
 
+	// Debug monitor - track writes
+	int write_count = 0;
+	always @(posedge clk) begin
+		if (GCN_DUT.enable_write_fm_wm_prod) begin
+			write_count++;
+			$display("Time=%0t: WRITE to FM_WM[%0d][%0d] = %0d",
+				$time,
+				GCN_DUT.feature_count,
+				GCN_DUT.weight_count,
+				GCN_DUT.dot_product_result);
+		end
+	end
+
 	// Debug monitor - final values
 	initial begin
 		wait (done === 1'b1);
 		#10;
+		$display("\n=== Total FM_WM writes: %0d (expected 18) ===", write_count);
 		$display("\n=== FM_WM Memory (Transformation Results) ===");
 		for (int row = 0; row < 6; row++) begin
 			$display("Row %0d: [%0d, %0d, %0d]",
@@ -95,6 +109,18 @@ end
 				GCN_DUT.fm_wm_memory_inst.mem[row][1],
 				GCN_DUT.fm_wm_memory_inst.mem[row][2]);
 		end
+		$display("\n=== Scratch Pad (Weight Column) ===");
+		$display("First 10 values: %0d %0d %0d %0d %0d %0d %0d %0d %0d %0d",
+			GCN_DUT.weight_col_stored[0],
+			GCN_DUT.weight_col_stored[1],
+			GCN_DUT.weight_col_stored[2],
+			GCN_DUT.weight_col_stored[3],
+			GCN_DUT.weight_col_stored[4],
+			GCN_DUT.weight_col_stored[5],
+			GCN_DUT.weight_col_stored[6],
+			GCN_DUT.weight_col_stored[7],
+			GCN_DUT.weight_col_stored[8],
+			GCN_DUT.weight_col_stored[9]);
 		$display("\n=== FM_WM_ADJ Memory (Aggregation Results) ===");
 		for (int row = 0; row < 6; row++) begin
 			$display("Node %0d: [%0d, %0d, %0d] -> argmax=%0d (expected=%0d)",
